@@ -27,6 +27,9 @@ defmodule RethinkdbEcto.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    [{:rethinkdb, "~> 0.2.0"}]
+    [
+      {:rethinkdb, "~> 0.2.0"},
+      {:ecto, "~> 1.0.0"}
+    ]
   end
 end

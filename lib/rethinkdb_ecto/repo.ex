@@ -1,4 +1,4 @@
-defmodule RethinkDB.Ecto.Connection do
+defmodule RethinkDB.Ecto.Repo do
   alias RethinkDB.Record
   alias RethinkDB.Collection
   alias RethinkDB.Query
@@ -150,32 +150,69 @@ defmodule RethinkDB.Ecto.Connection do
     {:ok, data}
   end
 
-  defmacro __using__(_) do
+  defmacro __using__(opts) do
+    otp_app = Dict.fetch!(opts, :otp_app)
     quote do
       use RethinkDB.Connection
 
+      @behaviour Ecto.Repo
+      @otp_app unquote(otp_app)
+
+      def __adapter__, do: RethinkDB.Ecto.Adapter
+      def __pool__, do: {:error, __MODULE__}
+      def __query_cache__, do: {:error, __MODULE__}
+      def __repo__, do: true
+
+      def start_link() do
+        db = config[:database]
+        start_link([db: db])
+      end
+
+      def stop(_pid), do: stop
+
+      def config, do: Ecto.Repo.Supervisor.config(__MODULE__, @otp_app, [])
+
       def get(model, id) do
-        RethinkDB.Ecto.Connection.get(__MODULE__, model, id)
+        RethinkDB.Ecto.Repo.get(__MODULE__, model, id)
       end
 
       def all(model) do
-        RethinkDB.Ecto.Connection.all(__MODULE__, model)
+        RethinkDB.Ecto.Repo.all(__MODULE__, model)
+      end
+
+      def all(%Ecto.Query{from: {"schema_migrations", model} } = e, opts) do
+        q = Query.table("schema_migrations") |> Query.map(fn (el) ->
+          Query.bracket(el, "version")
+        end)
+        %Collection{data: data} = run(q)
+        data
+      end
+
+      def delete_all(%Ecto.Query{from: {"schema_migrations", model} } = e, opts) do
+        [w] = e.wheres
+        [{v, _}] = w.params
+        q = Query.table("schema_migrations") |> Query.filter(%{version: v}) |> Query.delete
+        run(q)
       end
 
       def insert(changeset) do
-        RethinkDB.Ecto.Connection.insert(__MODULE__, changeset)
+        RethinkDB.Ecto.Repo.insert(__MODULE__, changeset)
+      end
+
+      def insert!(changeset, opts) do
+        RethinkDB.Ecto.Repo.insert(__MODULE__, changeset)
       end
 
       def update(changeset) do
-        RethinkDB.Ecto.Connection.update(__MODULE__, changeset)
+        RethinkDB.Ecto.Repo.update(__MODULE__, changeset)
       end
 
       def delete(changeset) do
-        RethinkDB.Ecto.Connection.delete(__MODULE__, changeset)
+        RethinkDB.Ecto.Repo.delete(__MODULE__, changeset)
       end
 
       def query(model, query) do
-        RethinkDB.Ecto.Connection.query(__MODULE__, model, query)
+        RethinkDB.Ecto.Repo.query(__MODULE__, model, query)
       end
     end
   end
