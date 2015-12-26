@@ -51,7 +51,6 @@ defmodule RethinkDB.Ecto.Repo do
   defp do_insert(connection, changeset) do
     model = Ecto.Changeset.apply_changes(changeset)
     module = model.__struct__ 
-    Ecto.Model.Callbacks.__apply__(module, :before_insert, changeset)
     table = model_table(model)
     data = model
       |> Map.from_struct
@@ -66,7 +65,9 @@ defmodule RethinkDB.Ecto.Repo do
       %Record{data: %{"inserted" => 1, "generated_keys" => [id]}} = x ->
         model = get(connection, module, id)
         changeset = %{changeset | model: model}
-        Ecto.Model.Callbacks.__apply__(module, :after_insert, changeset)
+        {:ok, model}
+      %Record{data: %{"inserted" => 1}} = x ->
+        changeset = %{changeset | model: model}
         {:ok, model}
     end
   end
@@ -89,7 +90,6 @@ defmodule RethinkDB.Ecto.Repo do
     model = Ecto.Changeset.apply_changes(changeset)
     module = model.__struct__ 
     id = model.id
-    Ecto.Model.Callbacks.__apply__(module, :before_update, changeset)
     table = model_table(model)
     data = model
       |> Map.from_struct
@@ -104,7 +104,6 @@ defmodule RethinkDB.Ecto.Repo do
       %Record{data: %{"replaced" => 1}} = x ->
         model = get(connection, module, id)
         changeset = %{changeset | model: model}
-        Ecto.Model.Callbacks.__apply__(module, :after_update, changeset)
         {:ok, model}
     end
   end
@@ -123,7 +122,6 @@ defmodule RethinkDB.Ecto.Repo do
     model = Ecto.Changeset.apply_changes(changeset)
     module = model.__struct__
     id = model.id
-    Ecto.Model.Callbacks.__apply__(module, :before_delete, changeset)
     table = model_table(model)
     result = Query.table(table)
       |> Query.get(id)
@@ -133,7 +131,6 @@ defmodule RethinkDB.Ecto.Repo do
       %Record{data: %{"deleted" => 1}} ->
         model = put_in(model.__meta__.state, :deleted)
         changeset = %{changeset | model: model}
-        Ecto.Model.Callbacks.__apply__(module, :after_delete, changeset)
         {:ok, model}
     end
   end
@@ -165,7 +162,10 @@ defmodule RethinkDB.Ecto.Repo do
 
       def start_link() do
         db = config[:database]
-        start_link([db: db])
+        host = config[:hostname]
+        port = config[:port]
+        auth_key = config[:auth_key]
+        start_link([db: db, host: host, port: port, auth_key: auth_key])
       end
 
       def stop(_pid), do: stop

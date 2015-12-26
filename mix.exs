@@ -14,7 +14,7 @@ defmodule RethinkdbEcto.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger, :rethinkdb]]
+    [applications: [:logger, :rethinkdb, :ecto]]
   end
 
   # Dependencies can be Hex packages:
@@ -28,8 +28,9 @@ defmodule RethinkdbEcto.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:rethinkdb, "~> 0.2.0"},
-      {:ecto, "~> 1.0.0"}
+      {:rethinkdb, path: "../rethinkdb-elixir"},
+      {:ecto, github: "elixir-lang/ecto"},
+      {:mock, "~> 0.1.1", only: :test}
     ]
   end
 end

@@ -43,8 +43,10 @@ defmodule RethinkDB.Ecto.Adapter do
     :ok
   end
 
-  def execute_ddl(repo, {:create, %Ecto.Migration.Table{name: name}, _fields}, _opts) do
-    db(repo.config[:database]) |> table_create(name) |> run(repo)
+  def execute_ddl(repo, {:create, e = %Ecto.Migration.Table{name: name}, fields}, opts) do
+    options = e.options || %{}
+    database = e.prefix || repo.config[:database]
+    db(database) |> table_create(name, options) |> run(repo)
     :ok
   end
 
@@ -53,8 +55,9 @@ defmodule RethinkDB.Ecto.Adapter do
     :ok
   end
 
-  def execute_ddl(repo, {:drop, %Ecto.Migration.Table{name: name}}, opts) do
-    db(repo.config[:database]) |> table_drop(name) |> run(repo)
+  def execute_ddl(repo, {:drop, e = %Ecto.Migration.Table{name: name}}, opts) do
+    database = e.prefix || repo.config[:database]
+    db(database) |> table_drop(name) |> run(repo)
     :ok
   end
 
