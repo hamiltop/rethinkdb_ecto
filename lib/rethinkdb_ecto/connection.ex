@@ -94,7 +94,7 @@ defmodule RethinkDB.Ecto.Connection do
     data = model
       |> Map.from_struct
       |> Map.delete(:__meta__)
-      |> Map.put(:updateed_at, Query.now)
+      |> Map.put(:updated_at, Query.now)
       |> Map.put(:updated_at, Query.now)
     result = Query.table(table)
       |> Query.get(id)
