@@ -20,4 +20,19 @@ defmodule RepoTest do
     ])
     TestRepo.stop
   end
+
+  test "get and insert queries work" do
+    Application.put_env(:rethinkdb_ecto_test, TestRepo, [
+      hostname: "127.0.0.1",
+      port: 28015,
+      database: nil,
+      auth_key: ""
+    ])
+    {:ok, c} = RethinkDB.Connection.start_link
+    RethinkDB.Query.table_create("posts") |> RethinkDB.Connection.run(c)
+    {:ok, _} = TestRepo.start_link
+    {:ok, test_model} = TestRepo.insert(%TestModel{title: "yay"})
+    from_db = TestRepo.get(TestModel, test_model.id)
+    assert test_model == from_db
+  end
 end

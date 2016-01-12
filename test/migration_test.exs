@@ -18,7 +18,12 @@ defmodule MigrationTest do
   end
 
   setup_all do
-    Application.put_env(:rethinkdb_ecto_test, TestRepo, [database: "first_test"])
+    Application.put_env(:rethinkdb_ecto_test, TestRepo, [
+      database: "first_test",
+      hostname: "127.0.0.1",
+      port: 28015,
+      auth_key: ""
+    ])
     {:ok, _} = TestRepo.start_link
     RethinkDB.Query.db_create(:first_test) |> TestRepo.run
     RethinkDB.Query.table_create(:schema_migrations) |> TestRepo.run

@@ -3,6 +3,6 @@
   "ecto": {:git, "https://github.com/elixir-lang/ecto.git", "78ddc593384047ba07617d5f3b6485ec5be88953", []},
   "meck": {:hex, :meck, "0.8.3"},
   "mock": {:hex, :mock, "0.1.1"},
-  "poison": {:hex, :poison, "1.5.0"},
+  "poison": {:hex, :poison, "1.5.2"},
   "poolboy": {:hex, :poolboy, "1.5.1"},
-  "rethinkdb": {:hex, :rethinkdb, "0.2.0"}}
+  "rethinkdb": {:git, "https://github.com/hamiltop/rethinkdb-elixir.git", "eb8a7f037f5fe5e84ddbb62d038017d8bccf5fc7", [branch: "ecto_work"]}}
