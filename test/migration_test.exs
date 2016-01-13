@@ -29,7 +29,7 @@ defmodule MigrationTest do
     RethinkDB.Query.table_create(:schema_migrations) |> TestRepo.run
     RethinkDB.Query.db_create(:other_test) |> TestRepo.run
     on_exit fn ->
-      {:ok, pid} = TestRepo.start_link
+      {:ok, _pid} = TestRepo.start_link
       RethinkDB.Query.db_create(:first_test) |> TestRepo.run
       RethinkDB.Query.db_drop(:other_test) |> TestRepo.run
       TestRepo.stop
@@ -52,7 +52,6 @@ defmodule MigrationTest do
     assert Enum.find(data, &(&1 == @table_name))
     Ecto.Migrator.down(TestRepo, 1, CreateTablePrefixMigrationTest, [])
     %RethinkDB.Record{data: data} = RethinkDB.Query.table_list |> TestRepo.run(%{db: :other_test})
-    IO.inspect data
     assert Enum.find(data, &(&1 == @table_name)) == nil
   end
 end

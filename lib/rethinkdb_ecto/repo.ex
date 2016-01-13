@@ -94,7 +94,6 @@ defmodule RethinkDB.Ecto.Repo do
     data = model
       |> Map.from_struct
       |> Map.delete(:__meta__)
-      |> Map.put(:updateed_at, Query.now)
       |> Map.put(:updated_at, Query.now)
     result = Query.table(table)
       |> Query.get(id)
@@ -161,11 +160,13 @@ defmodule RethinkDB.Ecto.Repo do
       def __repo__, do: true
 
       def start_link() do
-        db = config[:database]
-        host = config[:hostname]
-        port = config[:port]
-        auth_key = config[:auth_key]
-        start_link([db: db, host: host, port: port, auth_key: auth_key])
+        opts = Dict.take(config, [:database, :hostname, :port, :auth_key])
+          |> Enum.map(fn
+            {:database, v} -> {:db, v}
+            {:hostname, h} -> {:host, h}
+            x -> x
+          end)
+        start_link(opts)
       end
 
       def stop(_pid), do: stop
