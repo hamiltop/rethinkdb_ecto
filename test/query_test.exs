@@ -11,11 +11,14 @@ defmodule QueryTest do
     {:ok, conn: conn}
   end
 
-  test "get and insert queries work" do
+  test "get, insert and update queries work" do
     {:ok, test_model} = TestRepo.insert(%TestModel{title: "yay"})
     from_db = TestRepo.get(TestModel, test_model.id)
-
     assert test_model == from_db
+
+    # update_changeset = TestRepo.changeset(from_db, %{title: "yayay"})
+    # {:ok, updated_model} = TestRepo.update(update_changeset)
+    # assert updated_model.title == "yayay"
   end
 
   # test "respect schema" do

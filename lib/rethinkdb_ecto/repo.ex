@@ -119,7 +119,19 @@ defmodule RethinkDB.Ecto.Repo do
     {attr, RethinkDB.Query.time(year, month, day, hour, min, sec, "Z")}
   end
 
+  defp convert_date(%RethinkDB.Pseudotypes.Time{epoch_time: epoch_time}) do
+    epoch_time
+    |> round
+    |> +(62167219200) # :calendar.datetime_to_gregorian_seconds({{1970, 1, 1}, {0, 0, 0}})
+    |> :calendar.gregorian_seconds_to_datetime
+    |> convert_date_from_erl
+  end
+
   defp convert_date(x), do: x
+
+  defp convert_date_from_erl({date, {0, 0, 0}}), do: Ecto.Date.from_erl(date)
+  defp convert_date_from_erl({date, time}), do: Ecto.DateTime.from_erl({date, time})
+
 
   def delete(connection, changeset = %Ecto.Changeset{}) do
     # validations?
@@ -157,7 +169,7 @@ defmodule RethinkDB.Ecto.Repo do
   end
 
   defp load(x, data) do
-    {:ok, data}
+    {:ok, convert_date(data)}
   end
 
   defmacro __using__(opts) do
