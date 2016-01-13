@@ -171,7 +171,7 @@ defmodule RethinkDB.Ecto.Repo do
   end
 
   defp load(x, data) do
-    {:ok, convert_date(data)}
+    {:ok, convert_date_from_rethinkdb(data)}
   end
 
   defmacro __using__(opts) do
