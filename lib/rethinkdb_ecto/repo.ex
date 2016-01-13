@@ -74,30 +74,6 @@ defmodule RethinkDB.Ecto.Repo do
     end
   end
 
-  def convert_date(item) do
-    {attr, value} = item
-    date_string = to_date_string(value)
-
-    cond do
-      date_string -> {attr, to_rethinkdb_date(date_string)}
-      true -> item
-    end
-  end
-
-  defp to_rethinkdb_date(value), do: RethinkDB.Query.iso8601(value)
-
-  defp to_date_string(%Ecto.Date{year: year, month: month, day: day}) do
-    %Ecto.Date{year: year, month: month, day: day}
-    |> Ecto.Date.to_string
-  end
-
-  defp to_date_string(%Ecto.DateTime{year: year, month: month, day: day, hour: hour, min: min, sec: sec, usec: usec}) do
-    %Ecto.DateTime{year: year, month: month, day: day, hour: hour, min: min, sec: sec, usec: usec}
-    |> Ecto.DateTime.to_string
-  end
-
-  defp to_date_string(_), do: nil
-
   def update(module, changeset = %Ecto.Changeset{}) do
     case changeset.errors do
       [] ->
@@ -121,6 +97,8 @@ defmodule RethinkDB.Ecto.Repo do
       |> Map.from_struct
       |> Map.delete(:__meta__)
       |> Map.put(:updated_at, Query.now)
+      |> Enum.map(&convert_date/1)
+      |> Enum.into(%{})
     result = Query.table(table)
       |> Query.get(id)
       |> Query.update(data)
@@ -132,6 +110,16 @@ defmodule RethinkDB.Ecto.Repo do
         {:ok, model}
     end
   end
+
+  defp convert_date({attr, %Ecto.Date{year: year, month: month, day: day}}) do
+    {attr, RethinkDB.Query.time(year, month, day, "Z")}
+  end
+
+  defp convert_date({attr, %Ecto.DateTime{year: year, month: month, day: day, hour: hour, min: min, sec: sec, usec: usec}}) do
+    {attr, RethinkDB.Query.time(year, month, day, hour, min, sec, "Z")}
+  end
+
+  defp convert_date(x), do: x
 
   def delete(connection, changeset = %Ecto.Changeset{}) do
     # validations?
