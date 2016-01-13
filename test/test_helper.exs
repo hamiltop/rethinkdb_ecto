@@ -9,7 +9,8 @@ defmodule TestModel do
     field :title, :string
     field :content, :string
     field :user, :string
-   
+    field :date, Ecto.Date
+
     timestamps
   end
 end
