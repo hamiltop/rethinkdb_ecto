@@ -11,23 +11,27 @@ defmodule QueryTest do
     {:ok, conn: conn}
   end
 
-  test "get and insert queries work", %{conn: conn} do
+  test "get and insert queries work" do
     {:ok, test_model} = TestRepo.insert(%TestModel{title: "yay"})
     from_db = TestRepo.get(TestModel, test_model.id)
 
     assert test_model == from_db
   end
 
-  # test "respect schema", %{conn: conn} do
+  # test "respect schema" do
   #   {:error, changeset} = TestRepo.insert(%TestModel{blablabla: "yay"})
   #   assert changeset.errors == "blablabla"
   # end
 
-  # test "insert queries with date should work" do
-  #   date = Ecto.Date.utc
-  #   {:ok, test_model} = TestRepo.insert(%TestModel{date: date})
+  test "insert queries with Ecto.Date should work" do
+    date = Ecto.Date.utc
+    {:ok, test_model} = TestRepo.insert(%TestModel{date: date})
+    assert test_model.date == date
+  end
 
-  #   assert test_model.date == date
-  # end
-
+  test "insert queries with Ecto.DateTime should work" do
+    date = Ecto.DateTime.utc
+    {:ok, test_model} = TestRepo.insert(%TestModel{date: date})
+    assert test_model.date == date
+  end
 end
