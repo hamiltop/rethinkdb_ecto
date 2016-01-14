@@ -1,5 +1,6 @@
 defmodule QueryTest do
   use ExUnit.Case
+  import RethinkDB.Lambda
 
   setup do
     Application.put_env(:rethinkdb_ecto_test, TestRepo, [])
@@ -44,15 +45,15 @@ defmodule QueryTest do
   end
 
   test "filtered queries work", %{model: model}  do
-    {:ok, model_2} = TestRepo.insert(%TestModel{title: "yayay"})
+    {:ok, model_2} = TestRepo.insert(%TestModel{title: "yoyo"})
 
     query = RethinkDB.Query.table("posts") |>
-      RethinkDB.Query.filter(fn (post) ->
-        post[:title] == "yayay"
-      end)
+      RethinkDB.Query.filter(lambda(fn post ->
+        post[:title] == "yoyo"
+      end))
 
-    from_db = TestRepo.query(TestModel, query)
-    assert from_db.title == "yayay"
+    from_db = TestRepo.query(TestModel, query) |> List.first
+    assert from_db.title == "yoyo"
   end
 
   test "update queries work", %{model: model} do
