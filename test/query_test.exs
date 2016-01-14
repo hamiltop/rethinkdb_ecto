@@ -33,23 +33,27 @@ defmodule QueryTest do
     assert model == from_db
   end
 
-  # test "get many queries work", %{model: model}  do
-  #   {:ok, model_2} = TestRepo.insert(%TestModel{title: "yayay"})
-  #   from_db = TestRepo.all(TestModel)
-  #   assert from_db == [model, model_2]
-  # end
+  test "get many queries work"  do
+    TestModel |> TestRepo.all |> Enum.map(&(TestRepo.delete(&1)))
 
-  # test "filtered queries work", %{model: model}  do
-  #   {:ok, model_2} = TestRepo.insert(%TestModel{title: "yayay"})
+    {:ok, model} = TestRepo.insert(%TestModel{title: "yay"})
+    {:ok, model_2} = TestRepo.insert(%TestModel{title: "yayay"})
+    from_db = TestRepo.all(TestModel)
+    assert model in from_db
+    assert model_2 in from_db
+  end
 
-  #   query = table("posts") |>
-  #     filter(fn (post) ->
-  #       post[:title] == "yayay"
-  #     end)
+  test "filtered queries work", %{model: model}  do
+    {:ok, model_2} = TestRepo.insert(%TestModel{title: "yayay"})
 
-  #   from_db = TestRepo.query(TestModel, query)
-  #   assert from_db.title == "yayay"
-  # end
+    query = RethinkDB.Query.table("posts") |>
+      RethinkDB.Query.filter(fn (post) ->
+        post[:title] == "yayay"
+      end)
+
+    from_db = TestRepo.query(TestModel, query)
+    assert from_db.title == "yayay"
+  end
 
   test "update queries work", %{model: model} do
     update_changeset = TestRepo.changeset(model, %{title: "yayay"})
