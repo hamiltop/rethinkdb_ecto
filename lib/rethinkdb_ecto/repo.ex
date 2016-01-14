@@ -50,7 +50,7 @@ defmodule RethinkDB.Ecto.Repo do
 
   defp do_insert(connection, changeset) do
     model = Ecto.Changeset.apply_changes(changeset)
-    module = model.__struct__ 
+    module = model.__struct__
     table = model_table(model)
     data = model
       |> Map.from_struct
@@ -58,6 +58,8 @@ defmodule RethinkDB.Ecto.Repo do
       |> Map.delete(:id)
       |> Map.put(:inserted_at, Query.now)
       |> Map.put(:updated_at, Query.now)
+      |> Enum.map(&convert_date/1)
+      |> Enum.into(%{})
     result = Query.table(table)
       |> Query.insert(data)
       |> connection.run
@@ -88,13 +90,15 @@ defmodule RethinkDB.Ecto.Repo do
 
   defp do_update(connection, changeset) do
     model = Ecto.Changeset.apply_changes(changeset)
-    module = model.__struct__ 
+    module = model.__struct__
     id = model.id
     table = model_table(model)
     data = model
       |> Map.from_struct
       |> Map.delete(:__meta__)
       |> Map.put(:updated_at, Query.now)
+      |> Enum.map(&convert_date/1)
+      |> Enum.into(%{})
     result = Query.table(table)
       |> Query.get(id)
       |> Query.update(data)
@@ -106,6 +110,30 @@ defmodule RethinkDB.Ecto.Repo do
         {:ok, model}
     end
   end
+
+  defp convert_date({attr, %Ecto.Date{year: year, month: month, day: day}}) do
+    {attr, RethinkDB.Query.time(year, month, day, "Z")}
+  end
+
+  defp convert_date({attr, %Ecto.DateTime{year: year, month: month, day: day, hour: hour, min: min, sec: sec, usec: usec}}) do
+    {attr, RethinkDB.Query.time(year, month, day, hour, min, sec, "Z")}
+  end
+
+  defp convert_date(x), do: x
+
+  defp convert_date_from_rethinkdb(%RethinkDB.Pseudotypes.Time{epoch_time: epoch_time}) do
+    epoch_time
+    |> round
+    |> +(62167219200) # :calendar.datetime_to_gregorian_seconds({{1970, 1, 1}, {0, 0, 0}})
+    |> :calendar.gregorian_seconds_to_datetime
+    |> convert_date_from_erl
+  end
+
+  defp convert_date_from_rethinkdb(x), do: x
+
+  defp convert_date_from_erl({date, {0, 0, 0}}), do: Ecto.Date.from_erl(date)
+  defp convert_date_from_erl({date, time}), do: Ecto.DateTime.from_erl({date, time})
+
 
   def delete(connection, changeset = %Ecto.Changeset{}) do
     # validations?
@@ -143,7 +171,7 @@ defmodule RethinkDB.Ecto.Repo do
   end
 
   defp load(x, data) do
-    {:ok, data}
+    {:ok, convert_date_from_rethinkdb(data)}
   end
 
   defmacro __using__(opts) do
