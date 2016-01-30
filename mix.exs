@@ -28,7 +28,7 @@ defmodule RethinkdbEcto.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:rethinkdb, github: "hamiltop/rethinkdb-elixir", branch: "ecto_work"},
+      {:rethinkdb, github: "hamiltop/rethinkdb-elixir"},
       {:ecto, "~> 1.1"},
       {:mock, "~> 0.1.1", only: :test}
     ]
