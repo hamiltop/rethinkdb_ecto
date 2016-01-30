@@ -8,35 +8,35 @@ Examples:
 
 instead of:
 ```elixir
-def MyConnection do
-  use RethinkDB.Connection
+def MyApp.Repo do
+  use Ecto.Repo
 end
 ```
 
 do:
 
 ```elixir
-def MyConnection do
-  use RethinkDB.Ecto.Connection
+def MyApp.Repo do
+  use RethinkDB.Ecto.Repo
 end
 ```
 
 and then use it like:
 
 ```elixir
-p = MyConnection.get(Post, 1)
+p = Repo.get(Post, 1)
 
 changeset = Post.changeset(p, %{title: "cool stuff"})
 
-MyConnection.update(changeset)
+Repo.update(changeset)
 
-MyConnection.delete(p)
+Repo.delete(p)
 
-MyConnection.all(Post)
+Repo.all(Post)
 
 p = %Post{title: "boring stuff"}
 
-MyConnection.insert(p)
+Repo.insert(p)
 
 
 query = table("posts") |>
@@ -44,6 +44,6 @@ query = table("posts") |>
 	  post[:title] != "boring stuff" || post[:author] == "Greg"
 	end)
 
-MyConnection.query(Post, query)
+Repo.query(Post, query)
 
 ```
