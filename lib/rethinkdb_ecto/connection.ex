@@ -50,7 +50,7 @@ defmodule RethinkDB.Ecto.Connection do
 
   defp do_insert(connection, changeset) do
     model = Ecto.Changeset.apply_changes(changeset)
-    module = model.__struct__ 
+    module = model.__struct__
     Ecto.Model.Callbacks.__apply__(module, :before_insert, changeset)
     table = model_table(model)
     data = model
@@ -87,7 +87,7 @@ defmodule RethinkDB.Ecto.Connection do
 
   defp do_update(connection, changeset) do
     model = Ecto.Changeset.apply_changes(changeset)
-    module = model.__struct__ 
+    module = model.__struct__
     id = model.id
     Ecto.Model.Callbacks.__apply__(module, :before_update, changeset)
     table = model_table(model)
