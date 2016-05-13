@@ -1,3 +1,9 @@
+# CURRENT STATE
+
+This was an experiment, I think the results were that it wasn't a viable alternative to a full fledged Ecto adapter. I would highly recommend taking a look at https://github.com/almightycouch/rethinkdb_ecto as an alternative.
+
+Otherwise, there is not a plan to continue development here. That could change, but that's the state for now.
+
 # RethinkDB Ecto
 
 Shim library to make it easy to use RethinkDB with Ecto. This is not a full Ecto adapter. It allows using Changesets and validations and callbacks. It basically enables Ecto.Model only.
